@@ -18,20 +18,20 @@ export default class App extends React.Component {
     IsLoadingMore: false,
   };
 
-  // componentDidUpdate(prevState, prevProps) {
-  //   const prevSearch = prevProps.pictureName;
-  //   const nextSearch = this.state.pictureName;
-  //   const prevPage = prevProps.page;
-  //   const nextPage = this.state.page;
+  componentDidUpdate(prevState, prevProps) {
+    const prevSearch = prevProps.pictureName;
+    const nextSearch = this.state.pictureName;
+    const prevPage = prevProps.page;
+    const nextPage = this.state.page;
 
-  //   if (prevSearch !== nextSearch) {
-  //     this.loadPicture();
-  //     this.resetData();
-  //   }
-  //   if (nextPage > prevPage) {
-  //     this.loadPicture();
-  //   }
-  // }
+    if (prevSearch !== nextSearch) {
+      this.loadPicture();
+      this.resetData();
+    }
+    if (nextPage > prevPage) {
+      this.loadPicture();
+    }
+  }
 
   loadPicture = () => {
     const { pictureName, page } = this.state;
