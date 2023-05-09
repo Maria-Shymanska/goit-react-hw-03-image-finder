@@ -5,7 +5,7 @@ import Modal from './Modal/Modal';
 import LoadMore from './Button/Button';
 import LoaderSpiner from './Loader/Loader';
 import toast from 'react-hot-toast';
-import api from 'services/api';
+import api from '../services/api';
 import { mapper } from 'helpers/mapper';
 
 export default class App extends React.Component {
@@ -18,20 +18,20 @@ export default class App extends React.Component {
     IsLoadingMore: false,
   };
 
-  componentDidUpdate(prevState, prevProps) {
-    const prevSearch = prevProps.pictureName;
-    const nextSearch = this.state.pictureName;
-    const prevPage = prevProps.page;
-    const nextPage = this.state.page;
+  // componentDidUpdate(prevState, prevProps) {
+  //   const prevSearch = prevProps.pictureName;
+  //   const nextSearch = this.state.pictureName;
+  //   const prevPage = prevProps.page;
+  //   const nextPage = this.state.page;
 
-    if (prevSearch !== nextSearch) {
-      this.loadPicture();
-      this.resetData();
-    }
-    if (nextPage > prevPage) {
-      this.loadPicture();
-    }
-  }
+  //   if (prevSearch !== nextSearch) {
+  //     this.loadPicture();
+  //     this.resetData();
+  //   }
+  //   if (nextPage > prevPage) {
+  //     this.loadPicture();
+  //   }
+  // }
 
   loadPicture = () => {
     const { pictureName, page } = this.state;
@@ -56,12 +56,12 @@ export default class App extends React.Component {
   };
 
   handleFormSubmit = pictureName => {
-    // перезапись на новые 12 картинок при вводе новой строки валидной
+    // перезапуск на нові 12 картинок при вводі нової валидної строки
     this.resetPage();
     this.setState({ pictureName });
   };
 
-  // функция загрузки новых 12 картинок
+  // функцiя загрузки нових 12 картинок
   loadMore = () => {
     this.setState(prevState => ({
       page: prevState.page + 1,
@@ -74,21 +74,18 @@ export default class App extends React.Component {
     });
   };
 
-  // 1-МОДАЛКА)метод для закрытия модалки-пик
   closeModal = () => {
     this.setState({
       pictureModal: '',
     });
   };
 
-  // скидываем страницу на 1 при новой валидной строки
   resetPage() {
     this.setState({
       page: 1,
     });
   }
 
-  // скидываем инпут поиска на 0
   resetData() {
     this.setState({
       pictureData: '',
@@ -111,7 +108,6 @@ export default class App extends React.Component {
         {IsLoadingMore && <LoadMore onClick={this.loadMore} />}
         {pictureModal.length > 0 && (
           <Modal onClose={this.closeModal}>
-            {/* 2-МОДАЛКА) кинули метод закрытия в пропс в модалку-пик */}
             <img src={pictureModal} alt="" />
           </Modal>
         )}
