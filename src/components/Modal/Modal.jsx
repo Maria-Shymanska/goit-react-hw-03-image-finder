@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { createPortal } from 'react-dom';
-import { Overlay, ModalWindow } from './Modal.module.css';
+import Overlay from './Modal.module.css';
+import ModalWindow from './Modal.module.css';
 
 const modalRoot = document.querySelector('#modal-root');
 
