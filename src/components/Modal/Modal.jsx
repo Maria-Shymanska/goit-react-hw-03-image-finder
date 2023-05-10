@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { createPortal } from 'react-dom';
-import Overlay from './Modal.module.css';
-import ModalWindow from './Modal.module.css';
+import { Overlay, ModalWindow } from './Modal.styled';
 
 const modalRoot = document.querySelector('#modal-root');
 
@@ -26,7 +25,7 @@ export default class Modal extends Component {
     }
   };
 
-  
+  // 3-МОДАЛКА) при event  вызвали метод через пропс
   handleBackdropClick = event => {
     if (event.currentTarget === event.target) {
       this.props.onClose();

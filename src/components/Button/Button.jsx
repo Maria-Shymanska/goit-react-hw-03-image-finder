@@ -1,6 +1,5 @@
 import PropTypes from 'prop-types';
-import ButtonContainer from './Button.module.css';
-import Button from './Button.module.css';
+import { ButtonContainer, Button } from './Button.styled';
 
 const LoadMore = ({ onClick }) => {
   return (
