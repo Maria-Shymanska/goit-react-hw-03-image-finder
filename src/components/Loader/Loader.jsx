@@ -1,16 +1,20 @@
-import { TailSpin } from 'react-loader-spinner';
+import { ColorRing } from 'react-loader-spinner';
+import css from './Loader.module.css';
 
-const LoaderSpiner = () => {
-  const style = {
-    display: 'flex',
-    justifyContent: 'center',
-    aligniitems: 'center',
-  };
+function Loader() {
   return (
-    <div style={style}>
-      <TailSpin color="#00BFFF" height={80} width={80} />
+    <div className={css.wrapper}>
+      <ColorRing
+        visible={true}
+        height="100"
+        width="100"
+        ariaLabel="blocks-loading"
+        wrapperStyle={{ position: 'absolute', top: '30%', left: '50%' }}
+        wrapperClass="blocks-wrapper"
+        colors={['#dc85e8', '#fofofo', '#843c8d', '#e286f7', '#f786ec']}
+      />
     </div>
   );
-};
+}
 
-export default LoaderSpiner;
+export default Loader;

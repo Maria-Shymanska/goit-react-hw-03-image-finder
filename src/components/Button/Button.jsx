@@ -1,18 +1,16 @@
 import PropTypes from 'prop-types';
-import { ButtonContainer, Button } from './Button.styled';
+import css from './Button.module.css';
 
-const LoadMore = ({ onClick }) => {
+function Button({ onNextFetch }) {
   return (
-    <ButtonContainer>
-      <Button type="button" onClick={onClick}>
-        Load More
-      </Button>
-    </ButtonContainer>
+    <button className={css.button} type="button" onClick={onNextFetch}>
+      Load more
+    </button>
   );
+}
+
+Button.prototype = {
+  onNextFetch: PropTypes.func.isRequired,
 };
 
-export default LoadMore;
-
-LoadMore.propTypes = {
-  onClick: PropTypes.func.isRequired,
-};
+export default Button;

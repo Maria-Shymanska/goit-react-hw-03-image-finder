@@ -1,121 +1,166 @@
-import React from 'react';
-import ImageGallery from './ImageGallery/ImageGallery';
-import Searchbar from './Searchbar/Searchbar';
-import Modal from './Modal/Modal';
-import LoadMore from './Button/Button';
-import LoaderSpiner from './Loader/Loader';
-import toast from 'react-hot-toast';
-import api from 'services/api';
-import { mapper } from 'helpers/mapper';
+import { Component } from 'react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import fetchImages from 'services/images-api';
+import Searchbar from 'components/Searchbar/Searchbar';
+import ImageGallery from 'components/ImageGallery/ImageGallery';
+import Button from 'components/Button/Button';
+import Loader from 'components/Loader/Loader';
+import Modal from 'components/Modal/Modal';
 
-export default class App extends React.Component {
+export class App extends Component {
   state = {
-    pictureName: '',
-    pictureData: '',
-    pictureModal: '',
-    status: 'idle',
+    query: '',
     page: 1,
-    IsLoadingMore: false,
+    imagesOnPage: 0,
+    totalImage: 0,
+    isLoading: false,
+    showModal: false,
+    images: null,
+    error: null,
+    currentImageUrl: null,
+    currentImageDescription: null,
   };
 
   componentDidUpdate(prevProps, prevState) {
-    const prevSearch = prevProps.pictureName;
-    const nextSearch = this.state.pictureName;
-    const prevPage = prevProps.page;
-    const nextPage = this.state.page;
+    const { query, page } = this.state;
+    // console.log(this.state);
+    if (prevState.query !== query) {
+      this.setState(({ isLoading }) => ({ isLoading: !isLoading }));
 
-    if (prevSearch !== nextSearch) {
-      this.loadPicture();
-      this.resetData();
+      fetchImages(query)
+        .then(({ hits, totalHits }) => {
+          if (totalHits === 0) {
+            toast.warn(
+              'Sorry, there are no images matching your search query. Please try again.'
+            );
+            return;
+          }
+
+          if (totalHits > 0) {
+            toast.info(`Hooray! We found ${totalHits} images.`);
+          }
+
+          const gallery = hits.map(
+            ({ id, tags, webformatURL, largeImageURL }) => ({
+              id: id,
+              description: tags,
+              smallImage: webformatURL,
+              largeImage: largeImageURL,
+            })
+          );
+
+          return this.setState({
+            page: 1,
+            images: gallery,
+            imagesOnPage: gallery.length,
+            totalImage: totalHits,
+          });
+        })
+        .catch(error => this.setState({ error }))
+        .finally(() =>
+          this.setState(({ isLoading }) => ({ isLoading: !isLoading }))
+        );
     }
-    if (nextPage > prevPage) {
-      this.loadPicture();
+
+    if (prevState.page !== page && page !== 1) {
+      this.setState(({ isLoading }) => ({ isLoading: !isLoading }));
+
+      fetchImages(query, page)
+        .then(({ hits, totalHits }) => {
+          if (totalHits + 12 >= hits.length) {
+            toast.info(
+              `We're sorry, but you've reached the end of search results.`
+            );
+          }
+
+          console.log(hits);
+          const gallery = hits.map(
+            ({ id, tags, webformatURL, largeImageURL }) => ({
+              id: id,
+              description: tags,
+              smallImage: webformatURL,
+              largeImage: largeImageURL,
+            })
+          );
+
+          return this.setState(({ images, imagesOnPage }) => {
+            return {
+              images: [...images, ...gallery],
+              imagesOnPage: imagesOnPage + gallery.length,
+            };
+          });
+        })
+        .catch(error => this.setState({ error }))
+        .finally(() =>
+          this.setState(({ isLoading }) => ({ isLoading: !isLoading }))
+        );
     }
   }
 
-  loadPicture = () => {
-    const { pictureName, page } = this.state;
-    this.setState({ status: 'pending' });
-    api
-      .fetchPicture(pictureName, page)
-      .then(res => {
-        this.setState(prevState => ({
-          pictureData: [...prevState.pictureData, ...mapper(res.data.hits)],
-          status: 'resolved',
-          IsLoadingMore:
-            prevState.pictureData.length + res.data.hits.length ===
-            res.data.totalHits
-              ? false
-              : true,
-        }));
-        if (res.data.hits.length === 0) {
-          toast.error('There is no picture for that name');
-        }
-      })
-      .catch(error => console.log(error));
+  getSearchRequest = query => {
+    this.setState({ query });
   };
 
-  handleFormSubmit = pictureName => {
-    // перезапись на новые 12 картинок при вводе новой строки валидной
-    this.resetPage();
-    this.setState({ pictureName });
+  onNextFetch = () => {
+    this.setState(({ page }) => ({ page: page + 1 }));
   };
 
-  // функция загрузки новых 12 картинок
-  loadMore = () => {
-    this.setState(prevState => ({
-      page: prevState.page + 1,
-    }));
+  toggleModal = () => {
+    this.setState(({ showModal }) => ({ showModal: !showModal }));
   };
 
-  pictureModalClick = picture => {
-    this.setState({
-      pictureModal: picture,
-    });
+  openModal = e => {
+    const currentImageUrl = e.target.dataset.large;
+    const currentImageDescription = e.target.alt;
+
+    if (e.target.nodeName === 'IMG') {
+      this.setState(({ showModal }) => ({
+        showModal: !showModal,
+        currentImageUrl: currentImageUrl,
+        currentImageDescription: currentImageDescription,
+      }));
+    }
   };
-
-  // 1-МОДАЛКА)метод для закрытия модалки-пик
-  closeModal = () => {
-    this.setState({
-      pictureModal: '',
-    });
-  };
-
-  // скидываем страницу на 1 при новой валидной строки
-  resetPage() {
-    this.setState({
-      page: 1,
-    });
-  }
-
-  // скидываем инпут поиска на 0
-  resetData() {
-    this.setState({
-      pictureData: '',
-      IsLoadingMore: false,
-    });
-  }
 
   render() {
-    const { status, pictureData, pictureModal, IsLoadingMore } = this.state;
+    const {
+      images,
+      imagesOnPage,
+      totalImage,
+      isLoading,
+      showModal,
+      currentImageUrl,
+      currentImageDescription,
+    } = this.state;
+
+    const getSearchRequest = this.getSearchRequest;
+    const onNextFetch = this.onNextFetch;
+    const openModal = this.openModal;
+    const toggleModal = this.toggleModal;
+
     return (
-      <div>
-        <Searchbar onSubmit={this.handleFormSubmit} />
-        {pictureData.length > 0 && (
-          <ImageGallery
-            pictureData={pictureData}
-            onClick={this.pictureModalClick}
-          ></ImageGallery>
+      <>
+        <Searchbar onSubmit={getSearchRequest} />
+
+        {images && <ImageGallery images={images} openModal={openModal} />}
+
+        {isLoading && <Loader />}
+
+        {imagesOnPage >= 12 && imagesOnPage < totalImage && (
+          <Button onNextFetch={onNextFetch} />
         )}
-        {status === 'pending' && <LoaderSpiner />}
-        {IsLoadingMore && <LoadMore onClick={this.loadMore} />}
-        {pictureModal.length > 0 && (
-          <Modal onClose={this.closeModal}>
-            {/* 2-МОДАЛКА) кинули метод закрытия в пропс в модалку-пик */}
-            <img src={pictureModal} alt="" />
-          </Modal>
+
+        {showModal && (
+          <Modal
+            onClose={toggleModal}
+            currentImageUrl={currentImageUrl}
+            currentImageDescription={currentImageDescription}
+          />
         )}
-      </div>
+
+        <ToastContainer theme="colored" autoClose={2500} />
+      </>
     );
   }
 }
