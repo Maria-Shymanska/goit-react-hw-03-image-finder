@@ -1,8 +1,8 @@
 import { Component } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import fetchImages from 'services/images-api';
-import Searchbar from 'components/Searchbar/Searchbar';
+import fetchImages from '../services/api';
+import Searchbar from './Searchbar/Searchbar';
 import ImageGallery from 'components/ImageGallery/ImageGallery';
 import Button from 'components/Button/Button';
 import Loader from 'components/Loader/Loader';
@@ -24,7 +24,7 @@ export class App extends Component {
 
   componentDidUpdate(prevProps, prevState) {
     const { query, page } = this.state;
-    // console.log(this.state);
+    // console.log(this.state)
     if (prevState.query !== query) {
       this.setState(({ isLoading }) => ({ isLoading: !isLoading }));
 
