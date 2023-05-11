@@ -43,7 +43,7 @@ export class App extends Component {
 
           const gallery = hits.map(
             ({ id, tags, webformatURL, largeImageURL }) => ({
-              id: id,
+              id,
               description: tags,
               smallImage: webformatURL,
               largeImage: largeImageURL,
@@ -68,7 +68,7 @@ export class App extends Component {
 
       fetchImages(query, page)
         .then(({ hits, totalHits }) => {
-          if (totalHits + 12 >= hits.length) {
+          if (page * 12 >= totalHits) {
             toast.info(
               `We're sorry, but you've reached the end of search results.`
             );
